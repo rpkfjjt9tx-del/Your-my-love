@@ -5,66 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hamrah ❤️ Abbas</title>
     <style>
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ffe5ec; color: #ff4d6d; text-align: center; overflow: hidden; height: 100vh; display: flex; align-items: center; justify-content: center; }
-        .page { display: none; padding: 25px; width: 90%; max-width: 400px; background: white; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 4px solid #ff4d6d; animation: fadeIn 0.8s; position: relative; }
-        #page1 { display: block; }
-        h2 { font-size: 20px; line-height: 1.4; }
-        input, textarea { padding: 12px; border-radius: 15px; border: 2px solid #ff4d6d; margin: 15px 0; width: 85%; text-align: center; font-size: 16px; outline: none; font-family: inherit; }
-        textarea { height: 80px; resize: none; }
-        button { background: #ff4d6d; color: white; padding: 12px 30px; border: none; border-radius: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { transform: scale(1.05); background: #c9184a; }
-        .error { color: #800f2f; font-weight: bold; margin-top: 10px; display: none; font-size: 14px; }
-        #heart-anim { font-size: 50px; display: none; margin-top: 10px; animation: break 0.5s; }
-        @keyframes break { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        :root { --pink: #ff4d6d; --bg: #ffe5ec; --dark: #800f2f; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--dark); text-align: center; min-height: 100vh; overflow-x: hidden; }
+        
+        #lock-screen { position: fixed; inset: 0; background: radial-gradient(circle, #ff758f, #800f2f); z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; }
+        input, textarea { padding: 12px; border-radius: 20px; border: 2px solid var(--pink); margin: 10px; text-align: center; font-size: 16px; width: 260px; outline: none; }
+        
+        #main-content { display: none; padding: 20px; animation: fadeIn 1s; }
+        #timer { background: white; padding: 15px; border-radius: 20px; margin: 15px auto; max-width: 350px; border: 2px dashed var(--pink); font-weight: bold; }
+        
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; max-width: 400px; margin: 20px auto; }
+        .memory-box { position: relative; background: var(--pink); border-radius: 15px; height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; border: 3px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1); padding: 5px; }
+        .memory-box span { color: white; font-size: 40px; font-weight: bold; }
+        .memory-box img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 10px; }
+        .memory-text { display: none; font-size: 11px; color: white; font-weight: bold; margin-top: 5px; padding: 0 5px; }
+
+        button { background: var(--pink); color: white; padding: 12px 25px; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; transition: 0.3s; margin: 5px; }
+        button:hover { transform: scale(1.05); background: var(--dark); }
+        .back-btn { background: #666; font-size: 12px; padding: 8px 15px; margin-top: 20px; z-index: 10; }
+
+        .page { display: none; padding: 30px; animation: fadeIn 0.8s; min-height: 60vh; flex-direction: column; justify-content: center; align-items: center; }
+        .hint { font-size: 13px; color: #666; font-style: italic; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         #player-wrapper { position: absolute; top: -1000px; visibility: hidden; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
-        #noBtn { position: absolute; transition: 0.1s; z-index: 10; }
+        #voice-btn { display: none; background: #800f2f; margin-top: 20px; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <div id="player-wrapper"><div id="player"></div></div>
+    <audio id="myVoice" src="voice.mp3.m4a"></audio>
 
-    <div class="page" id="page1">
-        <h2 style="font-size: 40px; margin: 0;">💖</h2>
-        <h2>When did we first meet?</h2>
-        <p style="font-size: 12px;">(Hint: DD.MM.YYYY)</p>
-        <input type="text" id="ans1" placeholder="Type the date...">
-        <button onclick="check1()">Next Page ➡️</button>
-        <p class="error" id="err1">Try again babyy... 🤫</p>
+    <div id="lock-screen">
+        <h1 style="font-size: 45px; margin: 0;">🔒❤️</h1>
+        <h2>Hamrah ❤️ Abbas</h2>
+        <p>Hint: Our Anniversary 💍</p>
+        <input type="text" id="passInput" placeholder="DD.MM.YYYY">
+        <button onclick="checkPass()">Unlock My Heart</button>
     </div>
 
-    <div class="page" id="page2">
+    <div id="main-content">
+        <h1>Our Love Story ❤️</h1>
+        <div id="timer">
+            <p style="margin:0; font-size: 14px;">We've been together for:</p>
+            <div id="time-display" style="font-size: 18px; color: var(--pink);"></div>
+        </div>
+
+        <button id="music-btn" onclick="playMusic()">🎵 Play Our Song ❤️</button>
+        <p style="font-size: 13px;">(Click each box to reveal our memories 📸)</p>
+
+        <div class="grid">
+            <div class="memory-box" onclick="reveal(this, 'The day my heart chose you. ❤️')"><span>1</span><img src="1.PNG"><div class="memory-text"></div></div>
+            <div class="memory-box" onclick="reveal(this, 'Our beautiful first date. ✨')"><span>2</span><img src="2.PNG"><div class="memory-text"></div></div>
+            <div class="memory-box" onclick="reveal(this, 'My favorite smile in the world. 💚')"><span>3</span><img src="3.PNG"><div class="memory-text"></div></div>
+            <div class="memory-box" onclick="reveal(this, 'You are my peace and my home.')"><span>4</span><img src="4.JPG"><div class="memory-text"></div></div>
+            <div class="memory-box" onclick="reveal(this, 'Almost 3 years of making memories.')"><span>5</span><img src="5.PNG"><div class="memory-text"></div></div>
+            <div class="memory-box" onclick="reveal(this, 'Click continue... I have a question. 💌')"><span>6</span><img src="6.JPG"><div class="memory-text"></div></div>
+        </div>
+        <button onclick="showPage('q1')" style="width: 85%;">Let's Play a Game ➡️</button>
+    </div>
+
+    <div class="page" id="q1">
+        <h2>When did we first meet?</h2>
+        <input type="text" id="ans1" placeholder="DD.MM.YYYY">
+        <button onclick="check1()">Next ❤️</button>
+        <button class="back-btn" onclick="backToMain()">⬅ Back to Memories</button>
+    </div>
+
+    <div class="page" id="q2">
         <h2>Our first intimacy date?</h2>
-        <p style="font-size: 12px;">(I know you remember this...)</p>
+        <p class="hint">Hint: Ramadan</p>
         <input type="text" id="ans2" placeholder="DD.MM.YYYY">
         <button onclick="check2()">Continue ❤️</button>
-        <p class="error" id="err2">Wrong! 💔</p>
-        <div id="heart-anim">💔</div>
+        <button class="back-btn" onclick="showPage('q1')">⬅ Back</button>
     </div>
 
-    <div class="page" id="page3">
-        <h2>What is my favorite thing in the world? 🍫</h2>
-        <input type="text" id="ans3" placeholder="Hint: Kids love it!">
+    <div class="page" id="q3">
+        <h2>What is my favorite thing?</h2>
+        <p class="hint">Hint: Kids like it!</p>
+        <input type="text" id="ans3" placeholder="Type here...">
         <button onclick="check3()">Next ✨</button>
-        <p class="error" id="err3">Really? Try again babyy 🙄</p>
+        <button class="back-btn" onclick="showPage('q2')">⬅ Back</button>
     </div>
 
-    <div class="page" id="page4">
-        <h2>Is there something you want to say to me? 💌</h2>
-        <p style="font-size: 13px;">Type your heart out, Abbas...</p>
-        <textarea id="abbasMessage" placeholder="Write something sweet..."></textarea>
+    <div class="page" id="q4">
+        <h2>Anything you want to say to me? 💌</h2>
+        <textarea id="abbasMsg" placeholder="Type your heart out, Abbas..."></textarea>
         <br>
-        <button onclick="check4()">Send to my heart ❤️</button>
+        <button onclick="showPage('final')">Send to Hammu ❤️</button>
+        <button class="back-btn" onclick="showPage('q3')">⬅ Back</button>
     </div>
 
-    <div class="page" id="page5">
-        <h1 style="color: #ff4d6d; margin-bottom: 5px;">Abbas... ❤️</h1>
-        <p style="font-size: 18px; font-weight: bold;">Will you be mine forever and ever?</p>
-        <div style="margin-top: 50px; position: relative; height: 120px;">
-            <button onclick="celebrate()" style="font-size: 18px; padding: 15px 40px;">YES! 💍💖</button>
-            <button id="noBtn" onmouseover="moveNo()" onclick="moveNo()" style="padding: 10px 20px; background: #999;">NO 😭</button>
+    <div class="page" id="final">
+        <h1 id="f-title">Abbas... 💍</h1>
+        <div id="f-content">
+             <p id="f-text" style="font-size: 18px; font-weight: bold;">Will you be mine forever and ever?</p>
+             <div id="btn-wrap">
+                 <button id="yesBtn" onclick="sayYes()">YES! ❤️</button>
+                 <button id="noBtn" onclick="sayNo()">NO 😭</button>
+             </div>
         </div>
+        
+        <button id="voice-btn" onclick="playVoice()">🎤 Click to hear my voice 🎤</button>
+        
+        <button id="final-back" class="back-btn" onclick="showPage('q4')">⬅ Back to Message</button>
     </div>
 
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -73,73 +119,89 @@
         let player;
         function onYouTubeIframeAPIReady() {
             player = new YT.Player('player', {
-                height: '0', width: '0',
-                videoId: 'dEIMJeBPccU', 
-                playerVars: { 'autoplay': 1, 'controls': 0, 'loop': 1, 'playlist': 'dEIMJeBPccU' },
-                events: { 'onReady': (e) => e.target.playVideo() }
+                height: '0', width: '0', videoId: 'dEIMJeBPccU',
+                playerVars: { 'autoplay': 0, 'controls': 0, 'loop': 1, 'playlist': 'dEIMJeBPccU' }
             });
         }
+        function playMusic() { if(player) { player.playVideo(); document.getElementById("music-btn").innerText = "🎶 Playing..."; } }
 
-        function check1() {
-            if(document.getElementById("ans1").value === "23.07.2023") {
-                showPage(2);
-            } else { document.getElementById("err1").style.display = "block"; }
+        function checkPass() {
+            if(document.getElementById("passInput").value === "18.05.2023") {
+                document.getElementById("lock-screen").style.display = "none";
+                document.getElementById("main-content").style.display = "block";
+                startTimer();
+            } else { alert("Wrong date babyy! 🤫"); }
         }
 
-        function check2() {
-            if(document.getElementById("ans2").value === "10.03.2025") {
-                showPage(3);
-            } else {
-                document.getElementById("err2").style.display = "block";
-                document.getElementById("heart-anim").style.display = "block";
-                setTimeout(() => { document.getElementById("heart-anim").style.display = "none"; }, 2000);
+        function startTimer() {
+            const start = new Date("May 18, 2023 00:00:00").getTime();
+            setInterval(() => {
+                const now = new Date().getTime();
+                const d = now - start;
+                const days = Math.floor(d / 86400000);
+                const hrs = Math.floor((d % 86400000) / 3600000);
+                const mins = Math.floor((d % 3600000) / 60000);
+                const secs = Math.floor((d % 60000) / 1000);
+                document.getElementById("time-display").innerText = `${days} Days, ${hrs}h ${mins}m ${secs}s`;
+            }, 1000);
+        }
+
+        function reveal(box, text) {
+            box.querySelector('span').style.display = 'none';
+            box.querySelector('img').style.display = 'block';
+            box.querySelector('.memory-text').innerText = text;
+            box.querySelector('.memory-text').style.display = 'block';
+            box.style.height = 'auto';
+        }
+
+        function showPage(id) {
+            document.getElementById("main-content").style.display = "none";
+            document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+            document.getElementById(id).style.display = "flex";
+            
+            // Re-show buttons and reset text if user comes back to final page
+            if(id === 'final') {
+                document.getElementById("btn-wrap").style.display = "block";
+                document.getElementById("voice-btn").style.display = "none";
+                document.getElementById("noBtn").style.display = "inline-block";
+                document.getElementById("f-title").innerText = "Abbas... 💍";
+                document.getElementById("f-text").innerHTML = "Will you be mine forever and ever?";
             }
         }
 
-        function check3() {
-            let val = document.getElementById("ans3").value.toLowerCase().trim();
-            if(val === "kinder joy") {
-                showPage(4);
-            } else { document.getElementById("err3").style.display = "block"; }
+        function backToMain() {
+            document.querySelectorAll(".page").forEach(p => p.style.display = "none");
+            document.getElementById("main-content").style.display = "block";
         }
 
-        function check4() {
-            let msg = document.getElementById("abbasMessage").value;
-            if(msg.length < 2) {
-                alert("Say something sweet, babyy! ❤️");
-            } else {
-                showPage(5);
-            }
+        function check1() { if(document.getElementById("ans1").value === "23.07.2023") showPage('q2'); else alert("Wrong date! 🤫"); }
+        function check2() { if(document.getElementById("ans2").value === "10.03.2025") showPage('q3'); else alert("Try again babyy... 💔"); }
+        function check3() { if(document.getElementById("ans3").value.toLowerCase().includes("kinder joy")) showPage('q4'); else alert("Hint: Kids like it! 🍫"); }
+
+        function sayNo() {
+            document.getElementById("f-title").innerText = "சாவடிப்பேன் அப்பாஸ்! 😡❤️";
+            document.getElementById("f-text").innerHTML = "உனக்கு என்றைக்குமே நான் தான்! எனக்கு என்றைக்குமே நீ தான்!<br><br>இப்போ 'YES' சொல்லு!";
+            document.getElementById("noBtn").style.display = "none";
         }
 
-        function showPage(num) {
-            document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-            document.getElementById('page' + num).style.display = 'block';
+        function sayYes() {
+            document.getElementById("f-title").innerText = "💍❤️";
+            document.getElementById("f-text").innerHTML = `
+                <h2 style="color:var(--pink)">Hammu loves you so much ummmmmmw 💋💋</h2>
+                <p style="padding:10px; font-weight:bold; font-size:16px;">
+                    அப்பாஸ் எப்பவும் உன்னோட நான் இருப்பேன், எப்பவுமே எல்லாம் ஓகே ஆகும். உன்ன விட்டு போக மாட்டேன்! ❤️<br><br>
+                    அப்பாஸ் எப்பவும் உன்னோட நான் இப்பவும் எப்பவுமே எல்லாம் ஓகே ஆவும் உன்னய விட்டு போவ மாட்டன்.
+                </p>
+            `;
+            document.getElementById("btn-wrap").style.display = "none";
+            document.getElementById("voice-btn").style.display = "inline-block";
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
 
-        function moveNo() {
-            let btn = document.getElementById("noBtn");
-            let x = Math.random() * (window.innerWidth - 120);
-            let y = Math.random() * (window.innerHeight - 100);
-            btn.style.left = x + "px";
-            btn.style.top = y + "px";
-        }
-
-        function celebrate() {
-            document.getElementById("page5").innerHTML = "<h1 style='font-size: 40px;'>💍❤️</h1><h1>YES!</h1><p style='font-size: 20px;'>I Love You Forever, Abbas! <br> You are mine!</p>";
-            var duration = 15 * 1000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-            var interval = setInterval(function() {
-                var timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-                var particleCount = 50 * (timeLeft / duration);
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
-                confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
-            }, 250);
+        function playVoice() {
+            const voice = document.getElementById("myVoice");
+            if (player) player.setVolume(20); 
+            voice.play();
         }
     </script>
 </body>
